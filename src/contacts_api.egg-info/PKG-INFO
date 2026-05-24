@@ -1,0 +1,402 @@
+Metadata-Version: 2.4
+Name: contacts-api
+Version: 0.1.0
+Summary: REST API for contact management using FastAPI and SQLAlchemy
+Author-email: Developer <dev@example.com>
+License: MIT
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: fastapi==0.104.1
+Requires-Dist: uvicorn[standard]==0.24.0
+Requires-Dist: sqlalchemy==2.0.23
+Requires-Dist: alembic==1.12.1
+Requires-Dist: psycopg2-binary==2.9.9
+Requires-Dist: pydantic==2.5.0
+Requires-Dist: pydantic-settings==2.1.0
+Requires-Dist: python-dotenv==1.0.0
+Requires-Dist: python-multipart==0.0.6
+Provides-Extra: dev
+Requires-Dist: pytest==7.4.3; extra == "dev"
+Requires-Dist: pytest-asyncio==0.21.1; extra == "dev"
+Requires-Dist: httpx==0.25.1; extra == "dev"
+
+# Contact Management REST API
+
+A REST API for managing contacts built with FastAPI, SQLAlchemy, and PostgreSQL.
+
+## Features
+
+- **CRUD Operations**: Create, read, update, and delete contacts
+- **Search & Filter**: Search contacts by first name, last name, or email
+- **Pagination**: Paginated responses with configurable limit/offset
+- **Birthday Tracking**: Find contacts with upcoming birthdays
+- **Automatic Documentation**: Swagger UI and ReDoc documentation
+- **Database Migrations**: Alembic for version control of database schema
+- **Comprehensive Logging**: Structured logging to console and file
+- **Error Handling**: Detailed error messages and proper HTTP status codes
+- **Data Validation**: Pydantic schemas with validation
+
+## Project Structure
+
+```
+.
+├── src/
+│   ├── api/
+│   │   ├── __init__.py
+│   │   └── contacts.py           # API route handlers
+│   ├── conf/
+│   │   ├── __init__.py
+│   │   └── config.py             # Configuration and logging setup
+│   ├── database/
+│   │   ├── __init__.py
+│   │   ├── db.py                 # SQLAlchemy engine and session factory
+│   │   └── models.py             # SQLAlchemy models (Contact)
+│   ├── repository/
+│   │   ├── __init__.py
+│   │   └── contacts.py           # Data access layer
+│   ├── services/
+│   │   ├── __init__.py
+│   │   └── contacts.py           # Business logic layer
+│   ├── __init__.py
+│   ├── exceptions.py             # Custom exception classes
+│   └── schemas.py                # Pydantic request/response schemas
+├── alembic/
+│   ├── __init__.py
+│   ├── env.py                    # Alembic environment configuration
+│   ├── script.py.mako            # Alembic migration template
+│   └── versions/
+│       └── 001_initial_contacts_table.py  # Initial migration
+├── main.py                       # FastAPI application entry point
+├── pyproject.toml                # Project dependencies and metadata
+├── docker-compose.yml            # Docker Compose configuration for PostgreSQL
+├── alembic.ini                   # Alembic configuration
+├── .env                          # Environment variables (copy from .env.example)
+├── .env.example                  # Example environment variables
+├── .gitignore                    # Git ignore file
+└── README.md                     # This file
+```
+
+## Prerequisites
+
+- Python 3.10+
+- PostgreSQL 16+ (can be run via Docker)
+- pip or poetry for package management
+
+## Installation
+
+### 1. Clone the repository
+
+```bash
+cd goit-pythonweb-hw-08
+```
+
+### 2. Create a virtual environment
+
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+### 3. Install dependencies
+
+```bash
+pip install -e .
+```
+
+For development:
+```bash
+pip install -e ".[dev]"
+```
+
+### 4. Set up environment variables
+
+Copy `.env.example` to `.env` and adjust as needed:
+
+```bash
+cp .env.example .env
+```
+
+Default values in `.env`:
+```
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=contacts_db
+APP_ENV=development
+DEBUG=True
+LOG_LEVEL=INFO
+```
+
+### 5. Start PostgreSQL
+
+Using Docker:
+```bash
+docker-compose up -d
+```
+
+Or use your existing PostgreSQL installation and update `.env` accordingly.
+
+### 6. Run database migrations
+
+```bash
+alembic upgrade head
+```
+
+## Running the Application
+
+### Development mode with auto-reload
+
+```bash
+python main.py
+```
+
+Or using uvicorn directly:
+```bash
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### Production mode
+
+```bash
+uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+The API will be available at `http://localhost:8000`
+
+## API Documentation
+
+Once the application is running:
+
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+- **OpenAPI JSON**: http://localhost:8000/openapi.json
+
+## API Endpoints
+
+### Contacts
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/contacts` | Create a new contact |
+| GET | `/api/contacts` | Get all contacts (with optional search) |
+| GET | `/api/contacts/{contact_id}` | Get a specific contact |
+| GET | `/api/contacts/upcoming-birthdays` | Get contacts with upcoming birthdays |
+| PUT | `/api/contacts/{contact_id}` | Update a contact |
+| DELETE | `/api/contacts/{contact_id}` | Delete a contact |
+
+### System
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/health` | Health check endpoint |
+
+## Usage Examples
+
+### Create a contact
+
+```bash
+curl -X POST "http://localhost:8000/api/contacts" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "first_name": "John",
+    "last_name": "Doe",
+    "email": "john@example.com",
+    "phone": "+1234567890",
+    "birthday": "1990-05-15",
+    "additional_data": "Developer"
+  }'
+```
+
+### Get all contacts
+
+```bash
+curl "http://localhost:8000/api/contacts?skip=0&limit=10"
+```
+
+### Search contacts
+
+```bash
+curl "http://localhost:8000/api/contacts?first_name=John&email=example.com"
+```
+
+### Get upcoming birthdays
+
+```bash
+curl "http://localhost:8000/api/contacts/upcoming-birthdays?days=7"
+```
+
+### Get a specific contact
+
+```bash
+curl "http://localhost:8000/api/contacts/1"
+```
+
+### Update a contact
+
+```bash
+curl -X PUT "http://localhost:8000/api/contacts/1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phone": "+9876543210"
+  }'
+```
+
+### Delete a contact
+
+```bash
+curl -X DELETE "http://localhost:8000/api/contacts/1"
+```
+
+## Data Models
+
+### Contact
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| id | integer | auto | Auto-generated primary key |
+| first_name | string | yes | 1-50 characters |
+| last_name | string | yes | 1-50 characters |
+| email | string | yes | Valid email, unique |
+| phone | string | yes | 10-20 characters, unique |
+| birthday | string | yes | YYYY-MM-DD format |
+| additional_data | string | no | Max 500 characters |
+| created_at | datetime | auto | Automatic on creation |
+| updated_at | datetime | auto | Automatic on creation and update |
+
+## Database Migrations
+
+### Create a new migration
+
+```bash
+alembic revision --autogenerate -m "Description of changes"
+```
+
+### Apply migrations
+
+```bash
+alembic upgrade head
+```
+
+### Revert last migration
+
+```bash
+alembic downgrade -1
+```
+
+### View migration history
+
+```bash
+alembic history
+```
+
+## Logging
+
+Logs are written to:
+- **Console**: Real-time log output
+- **File**: `logs/app.log` (rotating file handler, max 10MB, keeps 5 backups)
+
+Adjust log level in `.env` with `LOG_LEVEL` (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+
+## Error Handling
+
+The API returns structured error responses:
+
+```json
+{
+  "detail": "Contact with ID 999 does not exist."
+}
+```
+
+Common HTTP status codes:
+- `200`: Success
+- `201`: Created
+- `204`: No Content (successful deletion)
+- `400`: Bad Request (validation error)
+- `404`: Not Found
+- `422`: Unprocessable Entity (validation error)
+- `500`: Internal Server Error
+
+## Testing
+
+Run tests with pytest:
+
+```bash
+pytest
+pytest -v  # Verbose output
+pytest --cov=src  # With coverage
+```
+
+## Development
+
+### Code formatting
+
+```bash
+black src/ main.py
+isort src/ main.py
+```
+
+### Type checking
+
+```bash
+mypy src/ main.py
+```
+
+## Stopping the Application
+
+Press `Ctrl+C` in the terminal running the application.
+
+To stop PostgreSQL (Docker):
+
+```bash
+docker-compose down
+```
+
+To remove PostgreSQL data:
+
+```bash
+docker-compose down -v
+```
+
+## Troubleshooting
+
+### Database connection errors
+
+1. Ensure PostgreSQL is running
+2. Check credentials in `.env`
+3. Verify `DB_HOST` and `DB_PORT`
+
+### Migration errors
+
+1. Check logs in `logs/app.log`
+2. Verify database is running
+3. Try `alembic downgrade -1` then `alembic upgrade head`
+
+### Import errors
+
+1. Ensure virtual environment is activated
+2. Reinstall dependencies: `pip install -e .`
+3. Check Python version (3.10+)
+
+## Future Enhancements
+
+- [ ] User authentication and authorization
+- [ ] Contact photo/avatar storage
+- [ ] Contact groups/categories
+- [ ] Email notifications for upcoming birthdays
+- [ ] Export contacts (CSV, vCard)
+- [ ] Rate limiting and throttling
+- [ ] Full-text search
+- [ ] API versioning
+
+## License
+
+MIT License
+
+## Author
+
+Developer Team
+
+## Support
+
+For issues and questions, please check the logs and ensure all services are running correctly.
