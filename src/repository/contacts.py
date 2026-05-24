@@ -2,7 +2,8 @@ import logging
 from datetime import date, timedelta
 from typing import List, Optional
 
-from sqlalchemy import IntegrityError, and_, func, or_
+from sqlalchemy import and_, func, or_
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from src.database.models import Contact

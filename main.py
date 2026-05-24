@@ -2,6 +2,8 @@ import logging
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.requests import Request
+from starlette.responses import Response
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.extension import _rate_limit_exceeded_handler
@@ -34,8 +36,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+def rate_limit_exception_handler(request: Request, exc: Exception) -> Response:
+    """Bridge SlowAPI handler to FastAPI's ExceptionHandler type."""
+    if isinstance(exc, RateLimitExceeded):
+        return _rate_limit_exceeded_handler(request, exc)
+    raise exc
+
+
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_exception_handler(RateLimitExceeded, rate_limit_exception_handler)
 app.add_middleware(SlowAPIMiddleware)
 
 
