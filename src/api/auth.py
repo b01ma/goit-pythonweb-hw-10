@@ -1,9 +1,11 @@
 from urllib.parse import parse_qs
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
+from pydantic import ValidationError as PydanticValidationError
 from sqlalchemy.orm import Session
 
 from src.database.db import get_db
+from src.exceptions import ValidationError
 from src.schemas import MessageResponse, RequestEmail, TokenResponse, UserCreate, UserLogin, UserResponse
 from src.services.auth import AuthService
 
@@ -28,7 +30,10 @@ async def login(
     content_type = request.headers.get("content-type", "")
 
     if "application/json" in content_type:
-        payload = UserLogin.model_validate(await request.json())
+        try:
+            payload = UserLogin.model_validate(await request.json())
+        except PydanticValidationError as exc:
+            raise ValidationError(str(exc)) from exc
         return AuthService.login_user(db, payload.email, payload.password)
 
     if "application/x-www-form-urlencoded" in content_type:

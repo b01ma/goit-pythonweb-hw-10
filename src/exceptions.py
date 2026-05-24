@@ -110,6 +110,17 @@ class EmailVerificationError(APIException):
         )
 
 
+class AvatarUploadError(APIException):
+    """Avatar upload error."""
+
+    def __init__(self, detail: str = "Avatar upload failed"):
+        super().__init__(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            error="Avatar upload error",
+            detail=detail,
+        )
+
+
 class ValidationError(APIException):
     """Data validation error."""
 
