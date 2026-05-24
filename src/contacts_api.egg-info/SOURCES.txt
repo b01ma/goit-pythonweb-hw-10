@@ -4,7 +4,9 @@ src/__init__.py
 src/exceptions.py
 src/schemas.py
 src/api/__init__.py
+src/api/auth.py
 src/api/contacts.py
+src/api/users.py
 src/conf/__init__.py
 src/conf/config.py
 src/contacts_api.egg-info/PKG-INFO
@@ -17,5 +19,11 @@ src/database/db.py
 src/database/models.py
 src/repository/__init__.py
 src/repository/contacts.py
+src/repository/users.py
 src/services/__init__.py
+src/services/auth.py
 src/services/contacts.py
+src/services/email.py
+src/services/users.py
+src/utils/cloudinary.py
+src/utils/security.py

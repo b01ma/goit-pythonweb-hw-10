@@ -12,6 +12,18 @@ from src.schemas import ContactCreate, ContactUpdate
 logger = logging.getLogger(__name__)
 
 
+def _birthday_for_year(birthday: date, year: int) -> date:
+    """Return the birthday occurrence for a specific year.
+
+    Leap-day birthdays are shifted to Feb 28 in non-leap years.
+    """
+
+    try:
+        return birthday.replace(year=year)
+    except ValueError:
+        return date(year, 2, 28)
+
+
 class ContactRepository:
     """Repository for contact database operations."""
 
@@ -180,10 +192,10 @@ class ContactRepository:
         upcoming = []
 
         for contact in all_contacts:
-            birthday_this_year = contact.birthday.replace(year=today.year)
+            birthday_this_year = _birthday_for_year(contact.birthday, today.year)
 
             if birthday_this_year < today:
-                birthday_this_year = contact.birthday.replace(year=today.year + 1)
+                birthday_this_year = _birthday_for_year(contact.birthday, today.year + 1)
 
             if today <= birthday_this_year <= end_date:
                 upcoming.append(contact)

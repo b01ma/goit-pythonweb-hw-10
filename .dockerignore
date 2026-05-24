@@ -1,0 +1,8 @@
+.git
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+logs
+postgres_data
+.env

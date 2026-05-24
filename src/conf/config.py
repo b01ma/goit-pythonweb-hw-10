@@ -45,6 +45,7 @@ class Settings(BaseSettings):
     MAIL_STARTTLS: bool = True
     MAIL_SSL_TLS: bool = False
     FRONTEND_BASE_URL: str = "http://localhost:3000"
+    BACKEND_BASE_URL: str = "http://localhost:8000"
 
     # Cloudinary
     CLOUDINARY_CLOUD_NAME: str = ""
@@ -59,8 +60,17 @@ class Settings(BaseSettings):
     def database_url(self) -> str:
         """Construct database URL from components."""
         return (
-            f"postgresql+psycopg2://"
+            f"postgresql+psycopg://"
             f"{self.DB_USER}:{self.DB_PASSWORD}@"
+            f"{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        )
+
+    @property
+    def safe_database_url(self) -> str:
+        """Construct database URL without exposing the password in logs."""
+        return (
+            f"postgresql+psycopg://"
+            f"{self.DB_USER}:***@"
             f"{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
         )
 

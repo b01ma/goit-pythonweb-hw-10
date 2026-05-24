@@ -45,7 +45,7 @@ async def startup_event():
     """Initialize database and log startup."""
     logger.info("Starting up application...")
     logger.info(f"Environment: {settings.APP_ENV}")
-    logger.info(f"Database URL: {settings.database_url}")
+    logger.info(f"Database URL: {settings.safe_database_url}")
 
 
 # Shutdown event

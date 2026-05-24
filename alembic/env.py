@@ -13,6 +13,7 @@ from sqlalchemy import engine_from_config, pool
 
 from src.conf.config import settings
 from src.database.db import Base
+from src.database import models  # noqa: F401
 
 # This is the Alembic Config object, which provides the values
 # of the [alembic] section of the alembic.ini file.

@@ -12,7 +12,9 @@ def send_verification_email(email: str, username: str, token: str) -> None:
         logger.warning("Skipping verification email because mail settings are incomplete")
         return
 
-    verify_url = f"{settings.FRONTEND_BASE_URL.rstrip('/')}/verify-email?token={token}"
+    verify_url = (
+        f"{settings.BACKEND_BASE_URL.rstrip('/')}/api/auth/verify-email?token={token}"
+    )
 
     message = EmailMessage()
     message["Subject"] = "Verify your email"

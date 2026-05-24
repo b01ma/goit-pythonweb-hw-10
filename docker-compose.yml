@@ -1,6 +1,51 @@
 version: "3.8"
 
 services:
+  app:
+    build:
+      context: .
+    container_name: contacts_api
+    command: sh -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000"
+    ports:
+      - "8000:8000"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_NAME: ${DB_NAME:-contacts_db}
+      APP_ENV: ${APP_ENV:-development}
+      DEBUG: ${DEBUG:-true}
+      APP_TITLE: ${APP_TITLE:-Contact Management API}
+      APP_VERSION: ${APP_VERSION:-0.1.0}
+      APP_DESCRIPTION: ${APP_DESCRIPTION:-REST API for managing contacts with FastAPI and SQLAlchemy}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      SECRET_KEY: ${SECRET_KEY:-change-me}
+      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      EMAIL_TOKEN_EXPIRE_HOURS: ${EMAIL_TOKEN_EXPIRE_HOURS:-24}
+      CORS_ALLOW_ORIGINS: '${CORS_ALLOW_ORIGINS:-["http://localhost:3000","http://localhost:8000"]}'
+      FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost:3000}
+      BACKEND_BASE_URL: ${BACKEND_BASE_URL:-http://localhost:8000}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_SERVER: ${MAIL_SERVER:-smtp.gmail.com}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-Contacts API}
+      MAIL_STARTTLS: ${MAIL_STARTTLS:-true}
+      MAIL_SSL_TLS: ${MAIL_SSL_TLS:-false}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    networks:
+      - contacts_network
+
   postgres:
     image: postgres:16-alpine
     container_name: contacts_db
