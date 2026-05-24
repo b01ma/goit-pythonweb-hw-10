@@ -1,4 +1,6 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, status
+from urllib.parse import parse_qs
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from src.database.db import get_db
@@ -19,8 +21,27 @@ def register(
 
 
 @router.post("/login", response_model=TokenResponse)
-def login(user_data: UserLogin, db: Session = Depends(get_db)) -> TokenResponse:
-    return AuthService.login_user(db, user_data.email, user_data.password)
+async def login(
+    request: Request,
+    db: Session = Depends(get_db),
+) -> TokenResponse:
+    content_type = request.headers.get("content-type", "")
+
+    if "application/json" in content_type:
+        payload = UserLogin.model_validate(await request.json())
+        return AuthService.login_user(db, payload.email, payload.password)
+
+    if "application/x-www-form-urlencoded" in content_type:
+        form_payload = parse_qs((await request.body()).decode())
+        username = form_payload.get("username", [""])[0]
+        password = form_payload.get("password", [""])[0]
+        if username and password:
+            return AuthService.login_user(db, username, password)
+
+    raise HTTPException(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        detail="Email and password are required.",
+    )
 
 
 @router.get("/verify-email", response_model=MessageResponse)
